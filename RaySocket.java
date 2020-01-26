@@ -1,35 +1,38 @@
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.net.Socket;
 
 public class RaySocket {
     public int port;
     public String host;
-    public boolean isConnected;
+    public boolean isConnected = false;
 
     private Socket socket;
-    private OutputStream outputStream;
-    private InputStream inputStream;
+    private BufferedReader reader;
+    private PrintWriter writer;
 
     public void connect() {
         try {
             socket = new Socket(host, port);
-            inputStream = socket.getInputStream();
-            outputStream = socket.getOutputStream();
+            reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            writer = new PrintWriter(socket.getOutputStream(), true);
             isConnected = true;
         } catch (IOException e) {
+            // Do nothing, as isConnected is false
         }
     }
 
-    public void write(byte cmdString[]) throws IOException {
-        outputStream.write(cmdString);
-        outputStream.flush();
+    public void send(String str) throws IOException {
+        writer.write(str);
     }
 
-    public String read() {
-        if (inputStream.read() != 0) {
-            // todo
+    public String readLine() {
+        try {
+            return reader.readLine();
+        } catch (IOException e) {
+            return null;
         }
     }
 }

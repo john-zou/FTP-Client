@@ -52,17 +52,29 @@ public class CSftp {
 			return;
 		}
 
-
-
 		try {
 			for (int len = 1; len > 0;) {
 				System.out.print("csftp> ");
 				len = System.in.read(cmdString);
 				if (len <= 0)
 					break;
-				rs.send(cmdString);
-				// Start processing the command here.
-				System.out.println("900 Invalid command.");
+
+				String stringToSend;
+
+				try {
+					stringToSend = Translator.translate(cmdString);
+				} catch (TranslationException e) {
+					System.out.println("900 Invalid command.");
+					continue;
+				}
+
+				rs.send(stringToSend);
+				String nextLine = rs.readLine();
+				System.out.println(nextLine);
+				while (nextLine != null) {
+					System.out.println(nextLine);
+					nextLine = rs.readLine();
+				}
 			}
 		} catch (IOException exception) {
 			System.err.println("998 Input error while reading commands, terminating.");

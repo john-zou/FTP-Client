@@ -54,12 +54,12 @@ public class Translator {
             if (split.length != 2) {
                 throw new TranslationException();
             }
-            break;
+            return new Translation(split[1], Action.CWD);
         case "dir":
             if (split.length != 1) {
                 throw new TranslationException();
             }
-            break;
+            return new Translation("", Action.PASV_LIST);
         default:
             throw new TranslationException();
         }

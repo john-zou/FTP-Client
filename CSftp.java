@@ -59,25 +59,19 @@ public class CSftp {
 				System.out.print("csftp> ");
 
 				cmdString = in.nextLine();
-				if (cmdString.length() <= 0)
-					break;
+				if (cmdString.length() > 0) {
+					Translation translationToSend;
 
-				Translation translationToSend;
+					try {
+						translationToSend = Translator.translate(cmdString);
+					} catch (TranslationException e) {
+						System.out.println("900 Invalid command.");
+						continue;
+					}
 
-				try {
-					translationToSend = Translator.translate(cmdString);
-				} catch (TranslationException e) {
-					System.out.println("900 Invalid command.");
-					continue;
+					rs.send(translationToSend);
 				}
 
-				rs.send(translationToSend);
-//				String nextLine = rs.readLine();
-//				System.out.println(nextLine);
-//				while (nextLine != null) {
-//					System.out.println(nextLine);
-//					nextLine = rs.readLine();
-//				}
 			}
 		} catch (IOException exception) {
 			System.err.println("998 Input error while reading commands, terminating.");

@@ -24,8 +24,11 @@ public class RaySocket {
         }
     }
 
-    public void send(String str) throws IOException {
-        writer.write(str);
+    public void send(Translation tl) throws IOException {
+        if (tl.action == Action.USER_PASS) {
+            writer.write("USER " + tl.ftpCommand);
+        }
+
     }
 
     public String readLine() {

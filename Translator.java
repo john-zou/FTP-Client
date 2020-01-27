@@ -5,8 +5,8 @@
 public class Translator {
     private static final int MAX_ARGS = 1;
 
-    public static Translation translate(byte[] input) throws TranslationException {
-        String str = new String(input);
+    public static Translation translate(String str) throws TranslationException {
+//        String str = new String(input);
         String[] split = str.split(" ", MAX_ARGS + 2);
         if (split.length == 0) {
             throw new TranslationException();
@@ -14,6 +14,10 @@ public class Translator {
 
         if (split.length > MAX_ARGS + 1) {
             throw new TranslationException();
+        }
+
+        for (int i = 0; i < split.length; i++) {
+            split[i] = split[i].trim();
         }
 
         String applicationCommand = split[0];
@@ -24,12 +28,12 @@ public class Translator {
             }
             return new Translation(split[1], Action.USER_PASS);
 
-        case "pass":
-            if (split.length != 2) {
+        case "pw":
+            if (split.length > 2) {
                 throw new TranslationException();
             }
-
-            break;
+            else if (split.length == 2) return new Translation(split[1], Action.PASS);
+            else return new Translation("", Action.PASS);
         case "quit":
             if (split.length != 1) {
                 throw new TranslationException();
@@ -61,5 +65,6 @@ public class Translator {
         default:
             throw new TranslationException();
         }
+        return new Translation("", Action.USER_PASS);
     }
 }

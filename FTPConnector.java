@@ -26,9 +26,9 @@ public class FTPConnector {
         }
     }
 
-    public void send(Command cmd) {
-        send(cmd, "");
-    }
+//    public void send(Command cmd) {
+//        send(cmd, "");
+//    }
 
     public void getReply() {
         String reply;
@@ -50,11 +50,24 @@ public class FTPConnector {
         }
     }
 
-    public void send(Command cmd, String arg) {
-        String str = cmd.toString() + " " + arg;
-        writer.println(str);
-        System.out.println("--> " + str);
-
+    public void send(Translation tl) throws IOException {
+        String toFTP = "";
+        if (tl.action == Action.USER_PASS) {
+            toFTP = "USER " + tl.ftpCommand;
+        }
+        else if (tl.action == Action.PASS) {
+            toFTP = "PASS " + tl.ftpCommand;
+        }
+        System.out.println("--> " + toFTP);
+        writer.write(toFTP + "\r\n");
+        writer.flush();
         getReply();
     }
+
+//    public void send(Command cmd, String arg) {
+//        String str = cmd.toString() + " " + arg;
+//        writer.println(str);
+//        System.out.println("--> " + str);
+//        getReply();
+//    }
 }

@@ -43,8 +43,7 @@ public class Translator {
             if (split.length != 2) {
                 throw new TranslationException();
             }
-
-            break;
+            return new Translation(split[1], Action.PASV_RETR);
         case "features":
             if (split.length != 1) {
                 throw new TranslationException();
@@ -63,6 +62,5 @@ public class Translator {
         default:
             throw new TranslationException();
         }
-        return new Translation("", Action.USER_PASS);
     }
 }

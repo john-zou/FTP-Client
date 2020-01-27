@@ -7,6 +7,9 @@ import java.net.UnknownHostException;
 
 import javafx.util.Pair;
 import java.util.Arrays;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.BufferedWriter;
 
 
 public class FTPConnector {
@@ -39,8 +42,10 @@ public class FTPConnector {
     public String getReply() {
         String reply = "";
         try {
-            while (!reader.ready()) {
-                // Wait
+            long t= System.currentTimeMillis();
+            long end = t+5000;
+            while(System.currentTimeMillis() < end && !reader.ready()) {
+
             }
             while (reader.ready()) {
                 try {
@@ -60,8 +65,10 @@ public class FTPConnector {
     public String getReply(BufferedReader rdr) {
         String reply = "";
         try {
-            while (!rdr.ready()) {
-                // Wait
+            long t= System.currentTimeMillis();
+            long end = t+5000;
+            while(System.currentTimeMillis() < end && !rdr.ready()) {
+
             }
             while (rdr.ready()) {
                 try {
@@ -76,6 +83,40 @@ public class FTPConnector {
             e.printStackTrace();
         }
         return reply;
+    }
+
+    public void writeBufferToFile(BufferedReader rdr, String filename) {
+        try {
+            int BUFFER_SIZE = 4096;
+            char[] buffer = new char[BUFFER_SIZE];
+
+            String reply = "";
+            File f = new File(filename);
+            FileWriter fr = new FileWriter(f);
+            BufferedWriter br  = new BufferedWriter(fr);
+            try {
+                long t= System.currentTimeMillis();
+                long end = t+5000;
+                while(System.currentTimeMillis() < end && !rdr.ready()) {
+
+                }
+                while (rdr.ready()) {
+                    try {
+                        if(rdr.read(buffer) != -1) br.write(buffer);
+
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                br.close();
+            }
+        } catch (IOException e) {
+            System.out.println("0x3A7 Data transfer connection I/O error, closing data connection.");
+        }
+
     }
 
     public void send(Translation tl) throws IOException {
@@ -102,7 +143,8 @@ public class FTPConnector {
             toFTP = "CWD " + tl.ftpCommand;
             sendFTP(toFTP);
             getReply();
-        } else if (tl.action == Action.PASV_LIST) {
+        }
+        else if (tl.action == Action.PASV_LIST) {
             toFTP = "PASV";
             sendFTP(toFTP);
             String reply = getReply();
@@ -129,6 +171,32 @@ public class FTPConnector {
             }
 
 
+        }
+        else if (tl.action == Action.PASV_RETR) {
+            toFTP = "PASV";
+            sendFTP(toFTP);
+            String reply = getReply();
+            Pair<String, Integer> port_ip = parsePASV(reply);
+
+            try {
+                Socket dataSocket = new Socket(port_ip.getKey(), port_ip.getValue());
+                BufferedReader date_message_reader = new BufferedReader(new InputStreamReader(dataSocket.getInputStream(), "UTF-8"));
+                toFTP = "RETR " + tl.ftpCommand;
+                sendFTP(toFTP);
+                reply = getReply();
+                if (!reply.startsWith("150 ")) {
+                    System.out.println("0x3A2 Data transfer connection to " + this.host +
+                            " on port " + String.valueOf(port_ip.getValue()) + " failed to open.");
+
+                } else {
+                    writeBufferToFile(date_message_reader, tl.ftpCommand);
+                    getReply();
+                    dataSocket.close();
+                }
+            } catch (IOException e) {
+                System.out.println("0x3A2 Data transfer connection to " + this.host +
+                        " on port " + String.valueOf(port_ip.getValue()) + " failed to open.");
+            }
         }
     }
 

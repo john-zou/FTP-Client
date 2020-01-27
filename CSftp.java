@@ -59,7 +59,7 @@ public class CSftp {
 				System.out.print("csftp> ");
 
 				cmdString = in.nextLine();
-				if (cmdString.length(); <= 0)
+				if (cmdString.length() <= 0)
 					break;
 
 				Translation translationToSend;

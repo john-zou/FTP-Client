@@ -58,16 +58,20 @@ public class FTPConnector {
         else if (tl.action == Action.PASS) {
             toFTP = "PASS " + tl.ftpCommand;
         }
+        else if (tl.action == Action.QUIT) {
+            toFTP = "QUIT";
+        }
+        else if (tl.action == Action.FEAT) {
+            toFTP = "FEAT";
+        }
         System.out.println("--> " + toFTP);
         writer.write(toFTP + "\r\n");
         writer.flush();
         getReply();
+        if (tl.action == Action.QUIT) System.exit(0);
     }
 
-//    public void send(Command cmd, String arg) {
-//        String str = cmd.toString() + " " + arg;
-//        writer.println(str);
-//        System.out.println("--> " + str);
-//        getReply();
-//    }
+    public void disconnect() throws IOException {
+        System.exit(0);
+    }
 }

@@ -38,8 +38,7 @@ public class Translator {
             if (split.length != 1) {
                 throw new TranslationException();
             }
-
-            break;
+            return new Translation("", Action.QUIT);
         case "get":
             if (split.length != 2) {
                 throw new TranslationException();
@@ -50,8 +49,7 @@ public class Translator {
             if (split.length != 1) {
                 throw new TranslationException();
             }
-
-            break;
+            return new Translation("", Action.FEAT);
         case "cd":
             if (split.length != 2) {
                 throw new TranslationException();

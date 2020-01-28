@@ -1,3 +1,3 @@
 public enum Action {
-    USER_PASS, PASS, QUIT, PASV_RETR, FEAT, CWD, PASV_LIST
+    USER, PASS, QUIT, RETR, FEAT, CWD, LIST
 }

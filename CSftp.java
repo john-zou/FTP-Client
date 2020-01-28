@@ -69,7 +69,7 @@ public class CSftp {
 					try {
 						translationToSend = Translator.translate(cmdString);
 					} catch (TranslationException e) {
-						System.out.println("900 Invalid command.");
+						System.out.println(e.getMessage());
 						continue;
 					}
 

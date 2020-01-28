@@ -120,7 +120,7 @@ public class FTPConnector {
 
     public void send(Translation tl) throws IOException {
         String toFTP = "";
-        if (tl.action == Action.USER_PASS) {
+        if (tl.action == Action.USER) {
             toFTP = "USER " + tl.ftpCommand;
             sendFTP(toFTP);
             getReply();
@@ -138,7 +138,7 @@ public class FTPConnector {
             toFTP = "CWD " + tl.ftpCommand;
             sendFTP(toFTP);
             getReply();
-        } else if (tl.action == Action.PASV_LIST) {
+        } else if (tl.action == Action.LIST) {
             toFTP = "PASV";
             sendFTP(toFTP);
             String reply = getReply();
@@ -165,7 +165,7 @@ public class FTPConnector {
                         + String.valueOf(port_ip.port + " failed to open."));
             }
 
-        } else if (tl.action == Action.PASV_RETR) {
+        } else if (tl.action == Action.RETR) {
             toFTP = "PASV";
             sendFTP(toFTP);
             String reply = getReply();

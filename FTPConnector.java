@@ -52,6 +52,7 @@ public class FTPConnector {
                 try {
                     reply = reader.readLine();
                     System.out.println("<-- " + reply);
+                    if (reply.length() > 3 && Character.isDigit(reply.charAt(0)) && reply.charAt(3) == '-') getReply();
 
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -75,7 +76,7 @@ public class FTPConnector {
                 try {
                     reply = rdr.readLine();
                     System.out.println(reply);
-
+                    if (reply.length() > 3 && Character.isDigit(reply.charAt(0)) && reply.charAt(3) == '-') getReply(rdr);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -88,7 +89,7 @@ public class FTPConnector {
 
     public void writeBufferToFile(BufferedReader rdr, String filename) {
         try {
-            int BUFFER_SIZE = 8;
+            int BUFFER_SIZE = 1;
             char[] buffer = new char[BUFFER_SIZE];
 
             String reply = "";
@@ -113,6 +114,7 @@ public class FTPConnector {
             } catch (IOException e) {
                 e.printStackTrace();
             } finally {
+                br.flush();
                 br.close();
             }
         } catch (IOException e) {

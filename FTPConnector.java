@@ -5,12 +5,10 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
-import javafx.util.Pair;
 import java.util.Arrays;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.BufferedWriter;
-
 
 public class FTPConnector {
     private Socket socket;
@@ -35,16 +33,16 @@ public class FTPConnector {
         }
     }
 
-//    public void send(Command cmd) {
-//        send(cmd, "");
-//    }
+    // public void send(Command cmd) {
+    // send(cmd, "");
+    // }
 
     public String getReply() {
         String reply = "";
         try {
-            long t= System.currentTimeMillis();
-            long end = t+5000;
-            while(System.currentTimeMillis() < end && !reader.ready()) {
+            long t = System.currentTimeMillis();
+            long end = t + 5000;
+            while (System.currentTimeMillis() < end && !reader.ready()) {
 
             }
             while (reader.ready()) {
@@ -65,9 +63,9 @@ public class FTPConnector {
     public String getReply(BufferedReader rdr) {
         String reply = "";
         try {
-            long t= System.currentTimeMillis();
-            long end = t+5000;
-            while(System.currentTimeMillis() < end && !rdr.ready()) {
+            long t = System.currentTimeMillis();
+            long end = t + 5000;
+            while (System.currentTimeMillis() < end && !rdr.ready()) {
 
             }
             while (rdr.ready()) {
@@ -93,16 +91,17 @@ public class FTPConnector {
             String reply = "";
             File f = new File(filename);
             FileWriter fr = new FileWriter(f);
-            BufferedWriter br  = new BufferedWriter(fr);
+            BufferedWriter br = new BufferedWriter(fr);
             try {
-                long t= System.currentTimeMillis();
-                long end = t+5000;
-                while(System.currentTimeMillis() < end && !rdr.ready()) {
+                long t = System.currentTimeMillis();
+                long end = t + 5000;
+                while (System.currentTimeMillis() < end && !rdr.ready()) {
 
                 }
                 while (rdr.ready()) {
                     try {
-                        if(rdr.read(buffer) != -1) br.write(buffer);
+                        if (rdr.read(buffer) != -1)
+                            br.write(buffer);
 
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -125,40 +124,36 @@ public class FTPConnector {
             toFTP = "USER " + tl.ftpCommand;
             sendFTP(toFTP);
             getReply();
-        }
-        else if (tl.action == Action.PASS) {
+        } else if (tl.action == Action.PASS) {
             toFTP = "PASS " + tl.ftpCommand;
             sendFTP(toFTP);
             getReply();
-        }
-        else if (tl.action == Action.QUIT) {
+        } else if (tl.action == Action.QUIT) {
             FTPExit();
-        }
-        else if (tl.action == Action.FEAT) {
+        } else if (tl.action == Action.FEAT) {
             toFTP = "FEAT";
             sendFTP(toFTP);
             getReply();
-        }
-        else if (tl.action == Action.CWD) {
+        } else if (tl.action == Action.CWD) {
             toFTP = "CWD " + tl.ftpCommand;
             sendFTP(toFTP);
             getReply();
-        }
-        else if (tl.action == Action.PASV_LIST) {
+        } else if (tl.action == Action.PASV_LIST) {
             toFTP = "PASV";
             sendFTP(toFTP);
             String reply = getReply();
-            Pair<String, Integer> port_ip = parsePASV(reply);
+            IPPort port_ip = parsePASV(reply);
 
             try {
-                Socket dataSocket = new Socket(port_ip.getKey(), port_ip.getValue());
-                BufferedReader date_message_reader = new BufferedReader(new InputStreamReader(dataSocket.getInputStream()));
+                Socket dataSocket = new Socket(port_ip.ip, port_ip.port);
+                BufferedReader date_message_reader = new BufferedReader(
+                        new InputStreamReader(dataSocket.getInputStream()));
                 toFTP = "LIST";
                 sendFTP(toFTP);
                 reply = getReply();
                 if (!reply.startsWith("150 ")) {
-                    System.out.println("0x3A2 Data transfer connection to " + this.host +
-                            " on port " + String.valueOf(port_ip.getValue()) + " failed to open.");
+                    System.out.println("0x3A2 Data transfer connection to " + this.host + " on port "
+                            + String.valueOf(port_ip.port) + " failed to open.");
 
                 } else {
                     getReply(date_message_reader);
@@ -166,27 +161,26 @@ public class FTPConnector {
                     dataSocket.close();
                 }
             } catch (IOException e) {
-                System.out.println("0x3A2 Data transfer connection to " + this.host +
-                        " on port " + String.valueOf(port_ip.getValue()) + " failed to open.");
+                System.out.println("0x3A2 Data transfer connection to " + this.host + " on port "
+                        + String.valueOf(port_ip.port + " failed to open.");
             }
 
-
-        }
-        else if (tl.action == Action.PASV_RETR) {
+        } else if (tl.action == Action.PASV_RETR) {
             toFTP = "PASV";
             sendFTP(toFTP);
             String reply = getReply();
-            Pair<String, Integer> port_ip = parsePASV(reply);
+            IPPort port_ip = parsePASV(reply);
 
             try {
-                Socket dataSocket = new Socket(port_ip.getKey(), port_ip.getValue());
-                BufferedReader date_message_reader = new BufferedReader(new InputStreamReader(dataSocket.getInputStream(), "UTF-8"));
+                Socket dataSocket = new Socket(port_ip.ip, port_ip.port);
+                BufferedReader date_message_reader = new BufferedReader(
+                        new InputStreamReader(dataSocket.getInputStream(), "UTF-8"));
                 toFTP = "RETR " + tl.ftpCommand;
                 sendFTP(toFTP);
                 reply = getReply();
                 if (!reply.startsWith("150 ")) {
-                    System.out.println("0x3A2 Data transfer connection to " + this.host +
-                            " on port " + String.valueOf(port_ip.getValue()) + " failed to open.");
+                    System.out.println("0x3A2 Data transfer connection to " + this.host + " on port "
+                            + String.valueOf(port_ip.port) + " failed to open.");
 
                 } else {
                     writeBufferToFile(date_message_reader, tl.ftpCommand);
@@ -194,8 +188,8 @@ public class FTPConnector {
                     dataSocket.close();
                 }
             } catch (IOException e) {
-                System.out.println("0x3A2 Data transfer connection to " + this.host +
-                        " on port " + String.valueOf(port_ip.getValue()) + " failed to open.");
+                System.out.println("0x3A2 Data transfer connection to " + this.host + " on port "
+                        + String.valueOf(port_ip.port) + " failed to open.");
             }
         }
     }
@@ -218,16 +212,16 @@ public class FTPConnector {
         System.out.println("--> " + str);
     }
 
-    private Pair<String, Integer> parsePASV(String response) {
+    private IPPort parsePASV(String response) {
         if (!response.startsWith("227 ")) {
             System.out.println("0xFFFF Processing error. PASV failed.");
             FTPExit();
         }
-        String bracket = response.substring(response.indexOf("(")+1, response.indexOf(")"));
+        String bracket = response.substring(response.indexOf("(") + 1, response.indexOf(")"));
         String[] bracketNums = bracket.split(",");
         String[] ipNums = Arrays.copyOfRange(bracketNums, 0, 4);
         String ip = String.join(".", ipNums);
         Integer port = Integer.parseInt(bracketNums[4]) * 256 + Integer.parseInt(bracketNums[5]);
-        return new Pair<String, Integer>(ip, port);
+        return new IPPort(ip, port);
     }
 }

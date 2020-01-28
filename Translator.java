@@ -6,7 +6,7 @@ public class Translator {
     private static final int MAX_ARGS = 1;
 
     public static Translation translate(String str) throws TranslationException {
-//        String str = new String(input);
+        // String str = new String(input);
         String[] split = str.split(" ", MAX_ARGS + 2);
         if (split.length == 0) {
             throw new TranslationException();
@@ -31,9 +31,10 @@ public class Translator {
         case "pw":
             if (split.length > 2) {
                 throw new TranslationException();
-            }
-            else if (split.length == 2) return new Translation(split[1], Action.PASS);
-            else return new Translation("", Action.PASS);
+            } else if (split.length == 2)
+                return new Translation(split[1], Action.PASS);
+            else
+                return new Translation("", Action.PASS);
         case "quit":
             if (split.length != 1) {
                 throw new TranslationException();

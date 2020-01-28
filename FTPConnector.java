@@ -60,25 +60,20 @@ public class FTPConnector {
         }
     }
 
-    private String getReply(BufferedReader rdr) {
+    private String getReply(BufferedReader rdr) throws IOException{
         String reply = "";
-        try {
-            long t = System.currentTimeMillis();
-            long end = t + 5000;
-            while (System.currentTimeMillis() < end && !rdr.ready()) {
+        long t = System.currentTimeMillis();
+        long end = t + 5000;
+        while (System.currentTimeMillis() < end && !rdr.ready()) {
 
-            }
-            while (rdr.ready()) {
-                reply = rdr.readLine();
-                System.out.println(reply);
-                if (reply.length() > 3 && Character.isDigit(reply.charAt(0)) && reply.charAt(3) == '-')
-                    getReply(rdr);
-            }
-        } catch (IOException e) {
-            System.out.println("0x3A7 Data transfer connection I/O error, closing data connection.");
-        } finally {
-            return reply;
         }
+        while (rdr.ready()) {
+            reply = rdr.readLine();
+            System.out.println(reply);
+            if (reply.length() > 3 && Character.isDigit(reply.charAt(0)) && reply.charAt(3) == '-')
+                getReply(rdr);
+        }
+        return reply;
     }
 
     private void writeBufferToFile(InputStream rdr, String filename) throws IOException {
@@ -104,6 +99,7 @@ public class FTPConnector {
     public void send(Translation tl) throws IOException {
         String toFTP = "";
         String reply;
+        Socket dataSocket = new Socket();
         if (tl.action == Action.USER) {
             toFTP = "USER " + tl.ftpCommand;
             sendFTP(toFTP);
@@ -125,7 +121,6 @@ public class FTPConnector {
         } else if (tl.action == Action.LIST) {
             IPPort port_ip = sendPASV();
             try {
-                Socket dataSocket = new Socket();
                 try {
                     dataSocket.connect(new InetSocketAddress(port_ip.ip, port_ip.port), 10000);
                 } catch (Exception e) {
@@ -142,16 +137,21 @@ public class FTPConnector {
                 if (reply.startsWith("150 ")) {
                     getReply(date_message_reader);
                     getReply();
-                    dataSocket.close();
                 }
             } catch (IOException e) {
                 System.out.println("0x3A7 Data transfer connection I/O error, closing data connection.");
+            } finally {
+                try {
+                    dataSocket.close();
+                } catch (Exception e) {
+                    System.out.println("0xFFFF Processing error. Cannot close datasocket. ");
+                }
+
             }
 
         } else if (tl.action == Action.RETR) {
             IPPort port_ip = sendPASV();
             try {
-                Socket dataSocket = new Socket();
                 try {
                     dataSocket.connect(new InetSocketAddress(port_ip.ip, port_ip.port), 10000);
                 } catch (Exception e) {
@@ -165,10 +165,16 @@ public class FTPConnector {
                 if (reply.startsWith("150 ")) {
                     writeBufferToFile(dataSocket.getInputStream(), tl.ftpCommand);
                     getReply();
-                    dataSocket.close();
                 }
             } catch (IOException e) {
                 System.out.println("0x3A7 Data transfer connection I/O error, closing data connection.");
+            } finally {
+                try {
+                    dataSocket.close();
+                } catch (Exception e) {
+                    System.out.println("0xFFFF Processing error. Cannot close datasocket. ");
+                }
+
             }
         }
     }

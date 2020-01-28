@@ -43,10 +43,10 @@ public class CSftp {
 		}
 
 		FTPConnector rs = new FTPConnector(host, port);
-//		rs.host = host;
-//		rs.port = port;
+		// rs.host = host;
+		// rs.port = port;
 
-//		rs.connect();
+		// rs.connect();
 		if (!rs.isConnected) {
 			System.out.println("Unsuccessful connection");
 			return;
@@ -60,8 +60,12 @@ public class CSftp {
 
 				cmdString = in.nextLine();
 				if (cmdString.length() > 0) {
-					Translation translationToSend;
+					if (cmdString.trim().startsWith("#")) {
+						// Silently ignore
+						continue;
+					}
 
+					Translation translationToSend;
 					try {
 						translationToSend = Translator.translate(cmdString);
 					} catch (TranslationException e) {
@@ -71,7 +75,6 @@ public class CSftp {
 
 					rs.send(translationToSend);
 				}
-
 			}
 		} catch (IOException exception) {
 			System.err.println("998 Input error while reading commands, terminating.");

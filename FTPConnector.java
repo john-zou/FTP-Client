@@ -4,6 +4,8 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.net.InetSocketAddress;
+
 
 import java.util.Arrays;
 import java.io.File;
@@ -21,7 +23,8 @@ public class FTPConnector {
     public FTPConnector(String host, int port) {
         this.host = host;
         try {
-            socket = new Socket(host, port);
+            socket = new Socket();
+            socket.connect(new InetSocketAddress(host, port), 20000);
             reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             writer = new PrintWriter(socket.getOutputStream(), true);
             getReply();
@@ -145,7 +148,8 @@ public class FTPConnector {
             IPPort port_ip = parsePASV(reply);
 
             try {
-                Socket dataSocket = new Socket(port_ip.ip, port_ip.port);
+                Socket dataSocket = new Socket();
+                dataSocket.connect(new InetSocketAddress(port_ip.ip, port_ip.port), 10000);
                 BufferedReader date_message_reader = new BufferedReader(
                         new InputStreamReader(dataSocket.getInputStream()));
                 toFTP = "LIST";

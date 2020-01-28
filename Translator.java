@@ -55,7 +55,7 @@ public class Translator {
             }
             return new Translation(arg, Action.CWD);
         case "dir":
-            if (!hasArg) {
+            if (hasArg) {
                 throw new TranslationException("0x002 Incorrect number of arguments.");
             }
             return new Translation("", Action.LIST);

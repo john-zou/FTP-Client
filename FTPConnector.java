@@ -4,9 +4,9 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.net.InetSocketAddress;
-
 
 import java.util.Arrays;
 import java.io.File;
@@ -33,10 +33,8 @@ public class FTPConnector {
 
             getReply();
             isConnected = true;
-        } catch (UnknownHostException e) {
-            isConnected = false;
-        } catch (IOException e) {
-            isConnected = false;
+        } catch (Exception e) {
+            System.out.println("0xFFFC Control connection to " + host + " on port " + port + " failed to open.");
         }
     }
 
@@ -51,7 +49,8 @@ public class FTPConnector {
             while (reader.ready()) {
                 reply = reader.readLine();
                 System.out.println("<-- " + reply);
-                if (reply.length() > 3 && Character.isDigit(reply.charAt(0)) && reply.charAt(3) == '-') getReply();
+                if (reply.length() > 3 && Character.isDigit(reply.charAt(0)) && reply.charAt(3) == '-')
+                    getReply();
             }
         } catch (IOException e) {
             System.out.println("0xFFFD Control connection I/O error, closing control connection.");
@@ -72,7 +71,8 @@ public class FTPConnector {
             while (rdr.ready()) {
                 reply = rdr.readLine();
                 System.out.println(reply);
-                if (reply.length() > 3 && Character.isDigit(reply.charAt(0)) && reply.charAt(3) == '-') getReply(rdr);
+                if (reply.length() > 3 && Character.isDigit(reply.charAt(0)) && reply.charAt(3) == '-')
+                    getReply(rdr);
             }
         } catch (IOException e) {
             System.out.println("0x3A7 Data transfer connection I/O error, closing data connection.");

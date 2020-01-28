@@ -126,7 +126,14 @@ public class FTPConnector {
             IPPort port_ip = sendPASV();
             try {
                 Socket dataSocket = new Socket();
-                dataSocket.connect(new InetSocketAddress(port_ip.ip, port_ip.port), 10000);
+                try {
+                    dataSocket.connect(new InetSocketAddress(port_ip.ip, port_ip.port), 10000);
+                } catch (Exception e) {
+                    System.out.println("0x3A2 Data transfer connection to " + this.host + " on port "
+                            + port_ip.port + " failed to open.");
+                    return;
+                }
+
                 BufferedReader date_message_reader = new BufferedReader(
                         new InputStreamReader(dataSocket.getInputStream()));
                 toFTP = "LIST";
@@ -138,30 +145,30 @@ public class FTPConnector {
                     dataSocket.close();
                 }
             } catch (IOException e) {
-                System.out.println("0x3A2 Data transfer connection to " + this.host + " on port "
-                        + String.valueOf(port_ip.port) + " failed to open.");
+                System.out.println("0x3A7 Data transfer connection I/O error, closing data connection.");
             }
 
         } else if (tl.action == Action.RETR) {
             IPPort port_ip = sendPASV();
             try {
                 Socket dataSocket = new Socket();
-                dataSocket.connect(new InetSocketAddress(port_ip.ip, port_ip.port), 10000);
+                try {
+                    dataSocket.connect(new InetSocketAddress(port_ip.ip, port_ip.port), 10000);
+                } catch (Exception e) {
+                    System.out.println("0x3A2 Data transfer connection to " + this.host + " on port "
+                            + port_ip.port + " failed to open.");
+                    return;
+                }
                 toFTP = "RETR " + tl.ftpCommand;
                 sendFTP(toFTP);
                 reply = getReply();
                 if (reply.startsWith("150 ")) {
-                    try {
-                        writeBufferToFile(dataSocket.getInputStream(), tl.ftpCommand);
-                    } catch (IOException e) {
-                        System.out.println("0x3A7 Data transfer connection I/O error, closing data connection.");
-                    }
+                    writeBufferToFile(dataSocket.getInputStream(), tl.ftpCommand);
                     getReply();
                     dataSocket.close();
                 }
             } catch (IOException e) {
-                System.out.println("0x3A2 Data transfer connection to " + this.host + " on port "
-                        + String.valueOf(port_ip.port) + " failed to open.");
+                System.out.println("0x3A7 Data transfer connection I/O error, closing data connection.");
             }
         }
     }

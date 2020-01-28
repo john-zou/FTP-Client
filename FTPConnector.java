@@ -162,7 +162,7 @@ public class FTPConnector {
                 }
             } catch (IOException e) {
                 System.out.println("0x3A2 Data transfer connection to " + this.host + " on port "
-                        + String.valueOf(port_ip.port + " failed to open.");
+                        + String.valueOf(port_ip.port + " failed to open."));
             }
 
         } else if (tl.action == Action.PASV_RETR) {

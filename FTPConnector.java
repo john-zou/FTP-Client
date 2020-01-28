@@ -38,11 +38,7 @@ public class FTPConnector {
         }
     }
 
-    // public void send(Command cmd) {
-    // send(cmd, "");
-    // }
-
-    public String getReply() {
+    private String getReply() {
         String reply = "";
         try {
             long t = System.currentTimeMillis();
@@ -66,7 +62,7 @@ public class FTPConnector {
         return reply;
     }
 
-    public String getReply(BufferedReader rdr) {
+    private String getReply(BufferedReader rdr) {
         String reply = "";
         try {
             long t = System.currentTimeMillis();
@@ -78,7 +74,8 @@ public class FTPConnector {
                 try {
                     reply = rdr.readLine();
                     System.out.println(reply);
-                    if (reply.length() > 3 && Character.isDigit(reply.charAt(0)) && reply.charAt(3) == '-') getReply(rdr);
+                    if (reply.length() > 3 && Character.isDigit(reply.charAt(0)) && reply.charAt(3) == '-')
+                        getReply(rdr);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -89,44 +86,29 @@ public class FTPConnector {
         return reply;
     }
 
-    public void writeBufferToFile(InputStream rdr, String filename) {
-        try {
-//            int BUFFER_SIZE = 1;
-            int buffer;
+    private void writeBufferToFile(InputStream rdr, String filename) throws IOException {
+        int buffer;
+        String reply = "";
+        File f = new File(filename);
+        FileOutputStream fr = new FileOutputStream(f);
 
-            String reply = "";
-            File f = new File(filename);
-            FileOutputStream fr = new FileOutputStream(f);
-//            BufferedWriter br = new BufferedWriter(fr);
-            try {
-                long t = System.currentTimeMillis();
-                long end = t + 5000;
-                while (System.currentTimeMillis() < end && rdr.available() == 0) {
+        long t = System.currentTimeMillis();
+        long end = t + 5000;
+        while (System.currentTimeMillis() < end && rdr.available() == 0) {
 
-                }
-                try {
-                    buffer = rdr.read();
-                    while (buffer != -1) {
-                        fr.write(buffer);
-                        buffer = rdr.read();
-                    }
-
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            } finally {
-                fr.close();
-            }
-        } catch (IOException e) {
-            System.out.println("0x3A7 Data transfer connection I/O error, closing data connection.");
         }
 
+        buffer = rdr.read();
+        while (buffer != -1) {
+            fr.write(buffer);
+            buffer = rdr.read();
+        }
+        fr.close();
     }
 
     public void send(Translation tl) throws IOException {
         String toFTP = "";
+        String reply;
         if (tl.action == Action.USER) {
             toFTP = "USER " + tl.ftpCommand;
             sendFTP(toFTP);
@@ -146,11 +128,7 @@ public class FTPConnector {
             sendFTP(toFTP);
             getReply();
         } else if (tl.action == Action.LIST) {
-            toFTP = "PASV";
-            sendFTP(toFTP);
-            String reply = getReply();
-            IPPort port_ip = parsePASV(reply);
-
+            IPPort port_ip = sendPASV();
             try {
                 Socket dataSocket = new Socket();
                 dataSocket.connect(new InetSocketAddress(port_ip.ip, port_ip.port), 10000);
@@ -174,15 +152,10 @@ public class FTPConnector {
             }
 
         } else if (tl.action == Action.RETR) {
-            toFTP = "PASV";
-            sendFTP(toFTP);
-            String reply = getReply();
-            IPPort port_ip = parsePASV(reply);
-
+            IPPort port_ip = sendPASV();
             try {
-                Socket dataSocket = new Socket(port_ip.ip, port_ip.port);
-//                BufferedReader date_message_reader = new BufferedReader(
-//                        new InputStreamReader(dataSocket.getInputStream(), "UTF-8"));
+                Socket dataSocket = new Socket();
+                dataSocket.connect(new InetSocketAddress(port_ip.ip, port_ip.port), 10000);
                 toFTP = "RETR " + tl.ftpCommand;
                 sendFTP(toFTP);
                 reply = getReply();
@@ -191,7 +164,12 @@ public class FTPConnector {
                             + String.valueOf(port_ip.port) + " failed to open.");
 
                 } else {
-                    writeBufferToFile(dataSocket.getInputStream(), tl.ftpCommand);
+                    try {
+                        writeBufferToFile(dataSocket.getInputStream(), tl.ftpCommand);
+                    } catch (IOException e) {
+                        System.out.println("0x3A7 Data transfer connection I/O error, closing data connection.");
+                    }
+
                     getReply();
                     dataSocket.close();
                 }
@@ -202,7 +180,14 @@ public class FTPConnector {
         }
     }
 
-    public void FTPExit() {
+    private IPPort sendPASV() {
+        String toFTP = "PASV";
+        sendFTP(toFTP);
+        String reply = getReply();
+        return parsePASV(reply);
+    }
+
+    private void FTPExit() {
         String toFTP = "QUIT";
         sendFTP(toFTP);
         getReply();
@@ -210,11 +195,12 @@ public class FTPConnector {
             socket.close();
         } catch (IOException e) {
 
+        } finally {
+            System.exit(0);
         }
-        System.exit(0);
     }
 
-    public void sendFTP(String str) {
+    private void sendFTP(String str) {
         writer.write(str + "\r\n");
         writer.flush();
         System.out.println("--> " + str);

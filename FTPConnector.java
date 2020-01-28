@@ -31,7 +31,7 @@ public class FTPConnector {
 
     private boolean isEndOfMultiline(String str) {
         return str.length() > 6 && Character.isDigit(str.charAt(0)) && Character.isDigit(str.charAt(1))
-                && Character.isDigit(str.charAt(2)) && str.charAt(3) == ' ' && str.endsWith("End");
+                && Character.isDigit(str.charAt(2)) && str.charAt(3) == ' ';
     }
 
     public FTPConnector(String host, int port) {

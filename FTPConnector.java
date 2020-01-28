@@ -23,6 +23,16 @@ public class FTPConnector {
 
     public boolean isConnected;
 
+    private boolean isStartOfMultiline(String str) {
+        return str.length() > 3 && Character.isDigit(str.charAt(0)) && Character.isDigit(str.charAt(1))
+                && Character.isDigit(str.charAt(2)) && str.charAt(3) == '-';
+    }
+
+    private boolean isEndOfMultiline(String str) {
+        return str.length() > 6 && Character.isDigit(str.charAt(0)) && Character.isDigit(str.charAt(1))
+                && Character.isDigit(str.charAt(2)) && str.charAt(3) == ' ' && str.endsWith("End");
+    }
+
     public FTPConnector(String host, int port) {
         this.host = host;
         try {
@@ -43,15 +53,22 @@ public class FTPConnector {
         try {
             long t = System.currentTimeMillis();
             long end = t + 5000;
-            while (System.currentTimeMillis() < end && !reader.ready()) {
-
-            }
-            while (reader.ready()) {
-                reply = reader.readLine();
-                System.out.println("<-- " + reply);
-                if (reply.length() > 3 && Character.isDigit(reply.charAt(0)) && reply.charAt(3) == '-')
-                    getReply();
-            }
+            boolean multiline = false;
+            do {
+                while (System.currentTimeMillis() < end && !reader.ready()) {
+                    // Wait for reply
+                }
+                while (reader.ready()) {
+                    reply = reader.readLine();
+                    System.out.println("<-- " + reply);
+                    if (isStartOfMultiline(reply)) {
+                        multiline = true;
+                    }
+                    if (isEndOfMultiline(reply)) {
+                        multiline = false;
+                    }
+                }
+            } while (multiline);
         } catch (IOException e) {
             System.out.println("0xFFFD Control connection I/O error, closing control connection.");
             FTPExit();

@@ -55,7 +55,7 @@ public class CSftp {
         Scanner in = new Scanner(System.in);
 
         try {
-            for (int len = 1; len > 0; ) {
+            for (int len = 1; len > 0;) {
                 System.out.print("csftp> ");
 
                 cmdString = in.nextLine();
@@ -77,7 +77,7 @@ public class CSftp {
                 }
             }
         } catch (IOException exception) {
-            System.err.println("998 Input error while reading commands, terminating.");
+            System.err.println("0xFFFE Input error while reading commands, terminating.");
         }
     }
 }

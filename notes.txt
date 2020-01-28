@@ -1,0 +1,22 @@
+Notes:
+
+TODO: handle multi-line reply:
+    code followed immediately by hyphen
+    last line will have code + single space + "End"
+
+FEAT
+    Doesn't require log in.
+
+LIST, RETR
+    Requires login and PASV
+    530 please login with USER and PASS
+
+    RETR: 550 Failed to open file.
+    425 User PORT or PASV first
+
+CWD
+    Requires login, doesn't require PASV
+    530 Please login with USER and PASS
+    550 Failed to change directory (if 2 arguments)
+    250 Directory successfully changed
+

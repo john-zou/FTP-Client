@@ -10,6 +10,7 @@ import java.net.InetSocketAddress;
 
 import java.util.Arrays;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.BufferedWriter;
 import java.io.FileOutputStream;
@@ -77,7 +78,7 @@ public class FTPConnector {
         }
     }
 
-    private String getReply(BufferedReader rdr) throws IOException{
+    private String getReply(BufferedReader rdr) throws IOException {
         String reply = "";
         long t = System.currentTimeMillis();
         long end = t + 5000;
@@ -95,16 +96,20 @@ public class FTPConnector {
 
     private void writeBufferToFile(InputStream rdr, String filename) throws IOException {
         int buffer;
-        String reply = "";
-        File f = new File(filename);
-        FileOutputStream fr = new FileOutputStream(f);
-
+        File f;
+        FileOutputStream fr;
+        try {
+            f = new File(filename);
+            fr = new FileOutputStream(f);
+        } catch (FileNotFoundException e) {
+            System.out.println("0x38E Access to local file " + filename + " denied.");
+            return;
+        }
         long t = System.currentTimeMillis();
         long end = t + 5000;
         while (System.currentTimeMillis() < end && rdr.available() == 0) {
 
         }
-
         buffer = rdr.read();
         while (buffer != -1) {
             fr.write(buffer);
@@ -141,8 +146,8 @@ public class FTPConnector {
                 try {
                     dataSocket.connect(new InetSocketAddress(port_ip.ip, port_ip.port), 10000);
                 } catch (Exception e) {
-                    System.out.println("0x3A2 Data transfer connection to " + this.host + " on port "
-                            + port_ip.port + " failed to open.");
+                    System.out.println("0x3A2 Data transfer connection to " + this.host + " on port " + port_ip.port
+                            + " failed to open.");
                     return;
                 }
 
@@ -172,8 +177,8 @@ public class FTPConnector {
                 try {
                     dataSocket.connect(new InetSocketAddress(port_ip.ip, port_ip.port), 10000);
                 } catch (Exception e) {
-                    System.out.println("0x3A2 Data transfer connection to " + this.host + " on port "
-                            + port_ip.port + " failed to open.");
+                    System.out.println("0x3A2 Data transfer connection to " + this.host + " on port " + port_ip.port
+                            + " failed to open.");
                     return;
                 }
                 toFTP = "RETR " + tl.ftpCommand;

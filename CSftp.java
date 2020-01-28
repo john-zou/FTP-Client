@@ -70,6 +70,13 @@ public class CSftp {
                         translationToSend = Translator.translate(cmdString);
                     } catch (TranslationException e) {
                         System.out.println(e.getMessage());
+
+                        // For fun: comment out if desired:
+                        if (e.getMessage().startsWith("0x001")) {
+                            System.out.print(DidYouMean.match(cmdString));
+                        }
+                        // End of "for fun" part
+
                         continue;
                     }
 

@@ -1,6 +1,7 @@
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
@@ -17,7 +18,7 @@ import java.io.InputStream;
 public class FTPConnector {
     private Socket socket;
     private BufferedReader reader;
-    private PrintWriter writer;
+    private BufferedWriter writer;
     private String host;
 
     public boolean isConnected;
@@ -28,7 +29,8 @@ public class FTPConnector {
             socket = new Socket();
             socket.connect(new InetSocketAddress(host, port), 20000);
             reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            writer = new PrintWriter(socket.getOutputStream(), true);
+            writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+
             getReply();
             isConnected = true;
         } catch (UnknownHostException e) {
@@ -47,19 +49,16 @@ public class FTPConnector {
 
             }
             while (reader.ready()) {
-                try {
-                    reply = reader.readLine();
-                    System.out.println("<-- " + reply);
-                    if (reply.length() > 3 && Character.isDigit(reply.charAt(0)) && reply.charAt(3) == '-') getReply();
-
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                reply = reader.readLine();
+                System.out.println("<-- " + reply);
+                if (reply.length() > 3 && Character.isDigit(reply.charAt(0)) && reply.charAt(3) == '-') getReply();
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println("0xFFFD Control connection I/O error, closing control connection.");
+            FTPExit();
+        } finally {
+            return reply;
         }
-        return reply;
     }
 
     private String getReply(BufferedReader rdr) {
@@ -71,19 +70,15 @@ public class FTPConnector {
 
             }
             while (rdr.ready()) {
-                try {
-                    reply = rdr.readLine();
-                    System.out.println(reply);
-                    if (reply.length() > 3 && Character.isDigit(reply.charAt(0)) && reply.charAt(3) == '-')
-                        getReply(rdr);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                reply = rdr.readLine();
+                System.out.println(reply);
+                if (reply.length() > 3 && Character.isDigit(reply.charAt(0)) && reply.charAt(3) == '-') getReply(rdr);
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println("0x3A7 Data transfer connection I/O error, closing data connection.");
+        } finally {
+            return reply;
         }
-        return reply;
     }
 
     private void writeBufferToFile(InputStream rdr, String filename) throws IOException {
@@ -192,9 +187,15 @@ public class FTPConnector {
     }
 
     private void sendFTP(String str) {
-        writer.write(str + "\r\n");
-        writer.flush();
-        System.out.println("--> " + str);
+        try {
+            writer.write(str + "\r\n");
+            writer.flush();
+            System.out.println("--> " + str);
+        } catch (IOException e) {
+            System.out.println("0xFFFD Control connection I/O error, closing control connection.");
+            FTPExit();
+        }
+
     }
 
     private IPPort parsePASV(String response) {

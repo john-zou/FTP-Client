@@ -87,7 +87,7 @@ public class FTPConnector {
 
     public void writeBufferToFile(BufferedReader rdr, String filename) {
         try {
-            int BUFFER_SIZE = 4096;
+            int BUFFER_SIZE = 8;
             char[] buffer = new char[BUFFER_SIZE];
 
             String reply = "";
